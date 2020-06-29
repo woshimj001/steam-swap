@@ -1,0 +1,13 @@
+﻿
+import fsys.config;
+createBasePath = ..fsys.getSpecial(0x1a /*_CSIDL_APPDATA*/) + "\mj20\steam-swap\";	
+var path=createBasePath+"config\";
+if(!..io.exist(path))fsys.createDir(path);
+config  = fsys.config(createBasePath+"config\");
+
+namespace config {
+	__appName = "steam-swap";
+	__appVersion = "1.0.0.01";
+	__appDescription = "steam账号切换";
+	__website = "";
+}

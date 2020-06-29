@@ -1,0 +1,35 @@
+import win.ui;
+/*DSG{{*/
+var mainForm = win.form(text="添加steam账户信息";right=449;bottom=109;mode="popup";sysmenu=false)
+mainForm.add(
+btn_cancel={cls="button";text="取   消";left=225;top=80;right=450;bottom=110;font=LOGFONT(h=-16);z=6};
+btn_confirm={cls="button";text="确   定";left=0;top=80;right=225;bottom=110;font=LOGFONT(h=-16);z=5};
+edit_pwd={cls="edit";left=240;top=25;right=430;bottom=55;edge=1;font=LOGFONT(h=-16);password=1;z=4};
+edit_user={cls="edit";left=20;top=25;right=210;bottom=55;edge=1;font=LOGFONT(h=-16);z=2};
+groupbox={cls="groupbox";text="用户名";left=5;top=5;right=225;bottom=65;edge=1;z=1};
+groupbox2={cls="groupbox";text="密码";left=225;top=5;right=445;bottom=65;edge=1;z=3}
+)
+/*}}*/
+
+win.setFocus(mainForm.edit_user.hwnd);
+function getInfo(){
+	var user=string.trim(mainForm.edit_user.text);
+	var pwd=string.trim(mainForm.edit_pwd.text);
+	if(#user==0 || #pwd ==0){
+		win.msgbox("用户名和密码不能为空","提示");
+		return;
+	}	
+	mainForm.endModal({user=user;pwd=pwd;});
+}
+mainForm.btn_confirm.oncommand = function(id,event){
+	getInfo();
+}
+mainForm.btn_cancel.oncommand = function(id,event){
+	mainForm.endModal();
+}
+mainForm.onOk = function(){
+    getInfo();
+}
+mainForm.show();
+win.loopMessage();
+return mainForm;

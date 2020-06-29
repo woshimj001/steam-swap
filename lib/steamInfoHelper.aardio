@@ -1,0 +1,38 @@
+﻿namespace steamInfoHelper
+import table;
+import helper;
+show=helper.show;
+aes=helper.aes;
+config=helper.config;
+
+class steamInfo{
+    index;
+    user;
+    enpwd;
+	@metaProperty;
+}
+steamInfo.metaProperty=..util.metaProperty(
+	pwd = {
+		_get = function(){ 
+			return aes.decrypt(owner.enpwd);
+		}
+		_set = function( value ){
+			if(!value)return null;
+			owner.enpwd=aes.encrypt(value);
+		} 	
+	};
+)
+
+function getInfosFromConfig(){
+	var infos=config.infos;
+	if(!infos)return null;
+	
+	var rels={};
+	for(k,v in infos){
+		var vo=steamInfo();
+		vo.index=v.index;vo.user=v.user;vo.enpwd=v.enpwd;
+		table.push(rels,vo);
+	}
+	table.sort(rels,function(b){ return owner.index<b.index});
+	return rels;
+}

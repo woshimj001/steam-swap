@@ -1,0 +1,119 @@
+import win.ui;
+import win.ui.statusbar;
+/*DSG{{*/
+var mainForm = win.form(text="steam账号切换工具 v0.1";right=569;bottom=274;bgcolor=15793151;border="dialog frame";edge=1;max=false)
+mainForm.add(
+btn_add={cls="button";text="增加";left=225;top=105;right=290;bottom=140;font=LOGFONT(h=-16);z=4};
+btn_del={cls="button";text="删除";left=300;top=105;right=365;bottom=140;font=LOGFONT(h=-16);z=9};
+btn_open={cls="button";text="...";left=520;top=35;right=555;bottom=65;font=LOGFONT(h=-16);z=8};
+btn_run={cls="button";text="运   行";left=35;top=180;right=130;bottom=230;font=LOGFONT(h=-16);z=6};
+cbb_steamInfo={cls="combobox";left=25;top=110;right=215;bottom=135;edge=1;font=LOGFONT(h=-16);items={};mode="dropdownlist";z=3};
+edit_path={cls="edit";left=25;top=35;right=515;bottom=65;acceptfiles=1;edge=1;font=LOGFONT(h=-16);readonly=1;z=7};
+gb_path={cls="groupbox";text="1.设置steam路径(支持拖拽)";left=15;top=10;right=560;bottom=75;acceptfiles=1;edge=1;z=1};
+groupbox={cls="groupbox";text="2.添加和选择steam账户信息";left=15;top=85;right=375;bottom=150;edge=1;z=2};
+groupbox2={cls="groupbox";text="3.运行steam";left=15;top=160;right=150;bottom=240;edge=1;z=5}
+)
+/*}}*/
+
+win.ui.statusbar(mainForm).addItem("Copyright (C) mj20")
+
+import table;
+import fsys.dlg;
+import steamInfoHelper;
+import helper;
+show=helper.show;
+isBlank=helper.isBlank;
+config=helper.config;
+g_steamPath=null;
+g_vos=null;
+
+function isValidPach(){
+	return ..io.exist(g_steamPath)!=null;
+}
+function modalAdd(){
+	var frmChild = mainForm.loadForm("\forms\addSteamInfo.aardio");
+	var rel=frmChild.doModal();
+	if(!rel)return;
+	
+	steamInfosAdd(rel.user,rel.pwd);
+	ui_refresh();
+}
+function steamInfosAdd(user,pwd){
+	var vo=steamInfoHelper.steamInfo();
+	vo.index=#g_vos+1;vo.user=user;vo.pwd=pwd;
+	table.push(g_vos,vo);
+	config.infos=g_vos;
+}
+function steamInfosDel(){
+	var delIndex=mainForm.cbb_steamInfo.selIndex;
+    var vos={};
+    var index=1;
+    for(i=1;#g_vos;1){
+    	if(delIndex==i)continue;
+    	var vo=table.clone(g_vos[i]);
+    	vo.index=index;
+    	index++;
+    	table.push(vos,vo);
+    }
+    g_vos=vos;
+    config.infos=g_vos;
+    ui_refresh();
+}
+function ui_refresh(){
+    var cbbTexts={};
+	for(k,v in g_vos){
+		table.push(cbbTexts,v.user);		
+	}
+	mainForm.cbb_steamInfo.items=cbbTexts;
+	if(#cbbTexts>0)mainForm.cbb_steamInfo.selIndex=1;
+}
+function run(){
+    if(!isValidPach()){mainForm.msgbox("不是有效的steam路径","提示");return;}
+    if(isBlank(mainForm.cbb_steamInfo.selText)){mainForm.msgbox("请选中steam账户信息","提示");return;}
+    
+    var index=mainForm.cbb_steamInfo.selIndex;
+    var cur=g_vos[index];
+
+	helper.killSteam();
+	helper.execSteam(g_steamPath,cur);
+}
+function setSteamPath(path){
+	if(!path || #path<9 || string.lower(string.right(path,9))!="steam.exe"){mainForm.msgbox('不是有效的steam.exe路径\r\n可以把steam.exe拖入',"提示");return;}
+	mainForm.edit_path.text=path;
+    g_steamPath=path;
+    config.path=path;
+}
+
+
+mainForm.btn_add.oncommand = function(id,event){
+	modalAdd();
+}
+mainForm.btn_run.oncommand = function(id,event){
+	run();
+}
+mainForm.gb_path.wndproc = function(hwnd,message,wParam,lParam){
+    if(message==0x233/*_WM_DROPFILES*/){
+    	var path=win.getDropFile(wParam)[1];
+    	setSteamPath(path);
+    }
+}
+mainForm.btn_open.oncommand = function(id,event){
+	var path = fsys.dlg.open('steam主程序|steam.exe|',,,mainForm);
+	if(path)setSteamPath(path);
+}
+mainForm.btn_del.oncommand = function(id,event){
+	steamInfosDel();
+}
+
+function init(){    
+	g_steamPath=helper.getSteamPath();
+	if(g_steamPath)mainForm.edit_path.text=g_steamPath;
+	
+	g_vos=steamInfoHelper.getInfosFromConfig();
+	if(!g_vos)g_vos={};
+	
+	ui_refresh();
+}
+init();
+mainForm.show();
+win.loopMessage();

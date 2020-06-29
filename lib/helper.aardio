@@ -1,0 +1,53 @@
+﻿
+namespace helper
+import console;
+import string;
+import fsys;
+import win.reg;
+import process;
+import crypt.aes;
+import config;config=config.config;
+aes=crypt.aes();
+aes.setPassword("1");
+
+function show(...){
+	console.dump(...);
+	console.pause();
+}
+function isNotBlank(t){
+	return t && #t >0; 
+}
+function isBlank(t){
+	return !isNotBlank(t);
+}
+
+function getSteamPath(){
+    var confPath=config.path;
+    if(confPath && ..io.exist(confPath))return confPath;
+    
+	var reg = win.reg("HKEY_CURRENT_USER\Software\Classes\steam\Shell\Open\Command",true);
+	if(!reg)return null;
+	var regPath;
+	for(name,value,t in reg.eachValue()) {
+		if(string.find(value,"@@\steam.exe")){
+			regPath=string.match(value,'[^<">]+');
+			break;
+		}
+	}
+	if(!regPath){return null;}
+	
+	config.path=regPath;
+	return regPath;
+}
+
+function execSteam(path,steamInfo){
+	if(!steamInfo) return;
+	var param=string.format('-login "%s" "%s"', steamInfo.user,steamInfo.pwd);
+	process.execute(path,param);
+}
+
+function killSteam(){
+	var prcs=process.find("steam.exe");
+	if(prcs)process.kill(prcs.id);
+}
+

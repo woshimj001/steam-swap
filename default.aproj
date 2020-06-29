@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<project ver="10" name="steam-swap" libEmbed="true" icon="..." ui="win" output="steam-swap.exe" CompanyName="火星大队地球小分队搬砖小组" FileDescription="steam-swap" LegalCopyright="Copyright (C) mj20" ProductName="steam-swap" InternalName="steam-swap" FileVersion="0.0.0.06" ProductVersion="0.0.0.06" publishDir="/dist/" dstrip="false" local="false">
+	<file name="main" path="main.aardio"/>
+	<folder name="资源文件" path="res" embed="true" local="false"/>
+	<folder name="窗体" path="forms" comment="" embed="true" local="false">
+		<file name="addSteamInfo.aardio" path="forms\addSteamInfo.aardio" comment="forms\addSteamInfo.aardio"/>
+	</folder>
+</project>
